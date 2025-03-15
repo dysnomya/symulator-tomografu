@@ -2,6 +2,7 @@ package com.github.dysnomya.tomograf;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -15,7 +16,10 @@ public class Sinogram {
     private int scans;
     private int detectors;
     private int angle;
+    private int[][] sinogramTable;
     private BufferedImage sinogram;
+    private int[][] resultTable;
+    private int[][] hitCount;
     private BufferedImage resultImage;
 
 
@@ -24,7 +28,10 @@ public class Sinogram {
         this.scans = 90;
         this.detectors = 180;
         this.angle = 270;
+        this.sinogramTable = new int[detectors][scans];
         this.sinogram = new BufferedImage(detectors, scans, BufferedImage.TYPE_BYTE_GRAY);
+        this.resultTable = new int[image.getWidth()][image.getHeight()];
+        this.hitCount = new int[image.getWidth()][image.getHeight()];
         this.resultImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
     }
 
@@ -32,8 +39,11 @@ public class Sinogram {
         this.image = image;
         this.scans = scans;
         this.detectors = detectors;
-        this.angle = 90;
+        this.angle = 180;
+        this.sinogramTable = new int[detectors][scans];
         this.sinogram = new BufferedImage(detectors, scans, BufferedImage.TYPE_BYTE_GRAY);
+        this.resultTable = new int[image.getWidth()][image.getHeight()];
+        this.hitCount = new int[image.getWidth()][image.getHeight()];
         this.resultImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
     }
 
@@ -61,85 +71,81 @@ public class Sinogram {
                 double x2 = r + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
                 double y2 = r + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
 
-                sinogram.setRGB(i, j, getColorFromImage(x1, y1, x2, y2));
+                sinogramTable[i][j] = getColorFromImage(x1, y1, x2, y2);
             }
         }
-//        normalizeSinogram();
+        normalizeSinogram();
     }
 
     private int getColorFromImage(double x1, double y1, double x2, double y2) {
-        List<Integer> colorList = getLine(x1, y1, x2, y2);
+        List<Point> colorList = getLine(x1, y1, x2, y2);
 
-//        int red = (int) Math.round(colorList.stream()
-//                .mapToInt(c -> new Color(c).getRed())
-//                .average()
-//                .orElse(0));
-
-        int red = Math.min(255, colorList.stream()
-                .mapToInt(c -> new Color(c).getRed())
-                .sum());
-
-        return new Color(red, red, red).getRGB();
+        return colorList.stream()
+                .mapToInt(point -> {
+                    int x = (int) point.getX();
+                    int y = (int) point.getY();
+                    return new Color(image.getRGB(x, y)).getRed();
+                })
+                .sum();
     }
 
     private void normalizeSinogram() {
-        int minValue = 255;
-        int maxValue = 0;
+        int minValue = Integer.MAX_VALUE;
+        int maxValue = Integer.MIN_VALUE;
 
-        for (int i = 0; i < sinogram.getWidth(); i++) {
-            for (int j = 0; j < sinogram.getHeight(); j++) {
-                int colorRGB = sinogram.getRGB(i, j);
-                int red = new Color(colorRGB).getRed();
-                minValue = Math.min(minValue, red);
-                maxValue = Math.max(maxValue, red);
+        for (int i = 0; i < detectors; i++) {
+            for (int j = 0; j < scans; j++) {
+                int radon = sinogramTable[i][j];
+                minValue = Math.min(minValue, radon);
+                maxValue = Math.max(maxValue, radon);
             }
         }
 
-        for (int i = 0; i < sinogram.getWidth(); i++) {
-            for (int j = 0; j < sinogram.getHeight(); j++) {
-                int colorRGB = sinogram.getRGB(i, j);
-                int red = new Color(colorRGB).getRed();
-                red = (int) Math.round((red * 255.0) / maxValue);
-                sinogram.setRGB(i, j, new Color(red, red, red).getRGB());
+        for (int i = 0; i < detectors; i++) {
+            for (int j = 0; j < scans; j++) {
+                int radon = sinogramTable[i][j];
+//                int color = (int) Math.round(((radon) * 255.0) / (maxValue));
+                int color = (int) Math.round(((radon - minValue) * 255.0) / (maxValue - minValue));
+                sinogram.setRGB(i, j, new Color(color, color, color).getRGB());
             }
         }
     }
 
-    private List<Integer> getLine(double x1, double y1, double x2, double y2) {
-        List<Integer> line = new ArrayList<>();
+    private List<Point> getLine(double x1, double y1, double x2, double y2) {
+        List<Point> line = new ArrayList<>();
 
-        int x1Int = (int) Math.round(x1);
-        int y1Int = (int) Math.round(y1);
-        int x2Int = (int) Math.round(x2);
-        int y2Int = (int) Math.round(y2);
+        int i1 = (int) Math.round(x1);
+        int j1 = (int) Math.round(y1);
+        int i2 = (int) Math.round(x2);
+        int j2 = (int) Math.round(y2);
 
-        int sx = x1Int < x2Int ? 1 : -1;
-        int sy = y1Int < y2Int ? 1 : -1;
+        int dx = Math.abs(i2 - i1);
+        int dy = Math.abs(j2 - j1);
 
-        int dx = Math.abs(x2Int - x1Int);
-        int dy = Math.abs(y2Int - y1Int);
+        int sx = i1 < i2 ? 1 : -1;
+        int sy = j1 < j2 ? 1 : -1;
 
         int e = dx - dy;
+        int e2;
 
         while (true) {
-            if (x1Int >= 0 && x1Int < image.getWidth() && y1Int >= 0 && y1Int < image.getHeight()) {
-                line.add(image.getRGB(x1Int, y1Int));
+            if (i1 >= 0 && i1 < image.getWidth() && j1 >= 0 && j1 < image.getHeight()) {
+                line.add(new Point(i1, j1));
             }
 
-            if (x1Int == x2Int && y1Int == y2Int) {
+            if (i1 == i2 && j1 == j2) {
                 break;
             }
 
-            int e2 = e * 2;
-
+            e2 = 2 * e;
             if (e2 > -dy) {
+                i1 += sx;
                 e -= dy;
-                x1Int += sx;
             }
 
             if (e2 < dx) {
+                j1 += sy;
                 e += dx;
-                y1Int += sy;
             }
         }
 
@@ -162,49 +168,50 @@ public class Sinogram {
                 double x2 = r + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
                 double y2 = r + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
 
-                colorLine(x1, y1, x2, y2, sinogram.getRGB(i, j));
+                colorLine(x1, y1, x2, y2, sinogramTable[i][j]);
+
+
             }
         }
+
+        normalizeResult();
 
     }
 
-    private void colorLine(double x1, double y1, double x2, double y2, int rgb) {
-        int x1Int = (int) Math.round(x1);
-        int y1Int = (int) Math.round(y1);
-        int x2Int = (int) Math.round(x2);
-        int y2Int = (int) Math.round(y2);
+    private void normalizeResult() {
+        int minValue = Integer.MAX_VALUE;
+        int maxValue = Integer.MIN_VALUE;
+        System.out.println("normalizing");
 
-        int sx = x1Int < x2Int ? 1 : -1;
-        int sy = y1Int < y2Int ? 1 : -1;
-
-        int dx = Math.abs(x2Int - x1Int);
-        int dy = Math.abs(y2Int - y1Int);
-
-        int e = dx - dy;
-
-        while (true) {
-            if (x1Int >= 0 && x1Int < image.getWidth() && y1Int >= 0 && y1Int < image.getHeight()) {
-                if (rgb > resultImage.getRGB(x1Int, y1Int) ) {
-                    resultImage.setRGB(x1Int, y1Int, rgb);
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                if (hitCount[i][j] != 0) {
+                    resultTable[i][j] /= hitCount[i][j];
                 }
-            }
-
-            if (x1Int == x2Int && y1Int == y2Int) {
-                break;
-            }
-
-            int e2 = e * 2;
-
-            if (e2 > -dy) {
-                e -= dy;
-                x1Int += sx;
-            }
-
-            if (e2 < dx) {
-                e += dx;
-                y1Int += sy;
+                int radon = resultTable[i][j];
+                minValue = Math.min(minValue, radon);
+                maxValue = Math.max(maxValue, radon);
             }
         }
 
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                int radon = resultTable[i][j];
+//                int color = (int) Math.round(((radon) * 255.0) / (maxValue));
+                int color = (int) Math.round(((radon - minValue) * 255.0) / (maxValue - minValue));
+                resultImage.setRGB(i, j, new Color(color, color, color).getRGB());
+            }
+        }
+    }
+
+    private void colorLine(double x1, double y1, double x2, double y2, int rgb) {
+        List<Point> pointList = getLine(x1, y1, x2, y2);
+
+        for (Point point : pointList) {
+            int x = (int) point.getX();
+            int y = (int) point.getY();
+            resultTable[x][y] += rgb;
+            hitCount[x][y] += 1;
+        }
     }
 }
