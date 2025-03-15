@@ -34,6 +34,9 @@ public class AppController {
     private ImageView imageSinogram;
 
     @FXML
+    private ImageView imageResult;
+
+    @FXML
     private void initialize() {
         imageChoice.getItems().addAll(getFileNames());
 
@@ -44,6 +47,11 @@ public class AppController {
         imageSinogram.setFitHeight(300);
         imageSinogram.setFitWidth(300);
         imageSinogram.setPreserveRatio(true);
+
+        imageResult.setFitHeight(300);
+        imageResult.setFitWidth(300);
+        imageResult.setPreserveRatio(true);
+
     }
 
     private String[] getFileNames() {
@@ -58,8 +66,6 @@ public class AppController {
         URL url = getClass().getResource("/tomograf-obrazy/" + imageChoice.getValue());
         imageBeforeView.setImage(new Image(url.toExternalForm()));
 
-
-
         generateSinogram(url);
     }
 
@@ -67,8 +73,10 @@ public class AppController {
         try {
             BufferedImage image = ImageIO.read(url); // JDeli.read(file)
             Sinogram sinogram = new Sinogram(image);
-            sinogram.doSth();
-            imageSinogram.setImage(sinogram.getImage());
+            sinogram.createSinogram();
+            imageSinogram.setImage(sinogram.getSinogram());
+            sinogram.recreateImage();
+            imageResult.setImage(sinogram.getResultImage());
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
