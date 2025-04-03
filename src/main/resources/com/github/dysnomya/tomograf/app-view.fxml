@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Slider?>
 <GridPane alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
           fx:controller="com.github.dysnomya.tomograf.AppController"
           fx:id="gridpane">
@@ -19,10 +20,9 @@
 <!--    </padding>-->
 
     <columnConstraints>
-        <ColumnConstraints percentWidth="25" />
-        <ColumnConstraints percentWidth="25" />
-        <ColumnConstraints percentWidth="25" />
-        <ColumnConstraints percentWidth="25" />
+        <ColumnConstraints percentWidth="33" />
+        <ColumnConstraints percentWidth="33" />
+        <ColumnConstraints percentWidth="33" />
     </columnConstraints>
 
     <rowConstraints>
@@ -31,14 +31,61 @@
     </rowConstraints>
 
 
-    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">
+    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
+
+        <Label fx:id="imageBeforeName"/>
+
+        <ImageView fx:id="imageBeforeView" fitHeight="400" fitWidth="400" preserveRatio="true"/>
+    </VBox>
+
+    <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="10">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        </padding>
+
+        <HBox spacing="10">
+            <Label text="Scans"/>
+            <Slider fx:id="scansSlider"
+                    min="15"
+                    max="900"
+                    value="90"
+                    showTickLabels="true"
+                    showTickMarks="true"
+                    snapToTicks="true"
+                    prefWidth="300"/>
+        </HBox>
+
+        <HBox spacing="10">
+            <Label text="Detectors"/>
+            <Slider fx:id="detectorsSlider"
+                    min="5" max="360"
+                    value="180"
+                    showTickLabels="true"
+                    showTickMarks="true"
+                    snapToTicks="true"
+                    prefWidth="300"/>
+        </HBox>
+
+        <HBox spacing="10">
+            <Label text="Angle"/>
+            <Slider fx:id="angleSlider"
+                    min="15"
+                    max="360"
+                    value="180"
+                    showTickLabels="true"
+                    showTickMarks="true"
+                    snapToTicks="true"
+                    prefWidth="300"/>
+        </HBox>
+
         <HBox spacing="10">
             <Label text="Wybierz zdjęcie"/>
             <ComboBox fx:id="imageChoice" onAction="#generateImage"/>
         </HBox>
+
     </VBox>
 
     <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
@@ -46,9 +93,9 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
 
-        <Label fx:id="imageBeforeName"/>
+        <Label text="Sinogram"/>
 
-        <ImageView fx:id="imageBeforeView"/>
+        <ImageView fx:id="imageSinogram" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
     <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
@@ -56,18 +103,31 @@
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
 
-        <Label text="Sinogram"/>
+        <Label text="Wynik"/>
 
-        <ImageView fx:id="imageSinogram"/>
+        <ImageView fx:id="imageResult" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
-    <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
+    <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="CENTER" spacing="10.0">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        </padding>
+
+        <Label text="Sinogram"/>
+
+        <ImageView fx:id="imageSinogramFiltered" fitHeight="400" fitWidth="400" preserveRatio="true"/>
+    </VBox>
+
+    <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" alignment="CENTER" spacing="10.0">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
 
         <Label text="Wynik"/>
 
-        <ImageView fx:id="imageResult"/>
+        <ImageView fx:id="imageResultFiltered" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
+
+
+
 </GridPane>

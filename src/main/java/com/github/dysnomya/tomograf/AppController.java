@@ -3,6 +3,7 @@ package com.github.dysnomya.tomograf;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -37,21 +38,24 @@ public class AppController {
     private ImageView imageResult;
 
     @FXML
+    private ImageView imageSinogramFiltered;
+
+    @FXML
+    private ImageView imageResultFiltered;
+
+    @FXML
+    private Slider scansSlider;
+
+    @FXML
+    private Slider detectorsSlider;
+
+    @FXML
+    private Slider angleSlider;
+
+
+    @FXML
     private void initialize() {
         imageChoice.getItems().addAll(getFileNames());
-
-        imageBeforeView.setFitHeight(300);
-        imageBeforeView.setFitWidth(300);
-        imageBeforeView.setPreserveRatio(true);
-
-        imageSinogram.setFitHeight(300);
-        imageSinogram.setFitWidth(300);
-        imageSinogram.setPreserveRatio(true);
-
-        imageResult.setFitHeight(300);
-        imageResult.setFitWidth(300);
-        imageResult.setPreserveRatio(true);
-
     }
 
     private String[] getFileNames() {
@@ -72,11 +76,19 @@ public class AppController {
     private void generateSinogram(URL url) {
         try {
             BufferedImage image = ImageIO.read(url); // JDeli.read(file)
-            Sinogram sinogram = new Sinogram(image);
-            sinogram.createSinogram();
-            imageSinogram.setImage(sinogram.getSinogram());
+            Sinogram sinogram = new Sinogram(image, (int) scansSlider.getValue(), (int) detectorsSlider.getValue(), (int) angleSlider.getValue());
+            imageSinogram.setImage(sinogram.processSinogram(false));
             sinogram.recreateImage();
             imageResult.setImage(sinogram.getResultImage());
+
+            System.out.println("a");
+
+
+            Sinogram sinogramFiltered = new Sinogram(image, (int) scansSlider.getValue(), (int) detectorsSlider.getValue(), (int) angleSlider.getValue());
+            imageSinogramFiltered.setImage(sinogramFiltered.processSinogram(true));
+
+            sinogramFiltered.recreateImage();
+            imageResultFiltered.setImage(sinogramFiltered.getResultImage());
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
