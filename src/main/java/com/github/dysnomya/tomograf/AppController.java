@@ -81,9 +81,6 @@ public class AppController {
             sinogram.recreateImage();
             imageResult.setImage(sinogram.getResultImage());
 
-            System.out.println("a");
-
-
             Sinogram sinogramFiltered = new Sinogram(image, (int) scansSlider.getValue(), (int) detectorsSlider.getValue(), (int) angleSlider.getValue());
             imageSinogramFiltered.setImage(sinogramFiltered.processSinogram(true));
 

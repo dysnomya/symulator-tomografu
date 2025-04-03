@@ -84,13 +84,15 @@ public class SinogramProcessor {
             return new Color(0, 0, 0);
         } else {
             int value = (int) (((sinogramTable[x][y] - tableMin) * 255.0) / (tableMax - tableMin));
-//            System.out.println(value + " " + tableMin + " " + tableMax);
             return new Color(value, value, value);
         }
     }
 
     public void filterSinogram() {
         double[] kernel = createKernel();
+
+        tableMin = Double.MAX_VALUE;
+        tableMax = Double.MIN_VALUE;
 
         for (int detector = 0; detector < detectors; detector++) {
             sinogramTable[detector] = convolve(sinogramTable[detector], kernel);
