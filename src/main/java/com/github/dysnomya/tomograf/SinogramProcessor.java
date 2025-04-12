@@ -1,17 +1,14 @@
 package com.github.dysnomya.tomograf;
 
 import javafx.embed.swing.SwingFXUtils;
-
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
+
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
-
-import org.jtransforms.fft.DoubleFFT_1D;
 
 public class SinogramProcessor {
     private BufferedImage image;
@@ -19,9 +16,9 @@ public class SinogramProcessor {
     private int detectors;
     private int angle;
     private double[][] sinogramTable;
-    private double tableMin;
-    private double tableMax;
+    private Statistics statistics;
     private BufferedImage sinogram;
+
 
     public SinogramProcessor(BufferedImage image, int scans, int detectors, int angle) {
         this.image = image;
@@ -30,12 +27,15 @@ public class SinogramProcessor {
         this.angle = angle;
         this.sinogram = new BufferedImage(detectors, scans, BufferedImage.TYPE_BYTE_GRAY);
         this.sinogramTable = new double[detectors][scans];
-        this.tableMin = Double.MAX_VALUE;
-        this.tableMax = Double.MIN_VALUE;
+        this.statistics = new Statistics();
     }
 
     public Image getSinogram() {
         return SwingFXUtils.toFXImage(sinogram, null);
+    }
+
+    public BufferedImage getSinogramBufferedImage() {
+        return sinogram;
     }
 
     public double[][] getSinogramTable() {
@@ -59,13 +59,14 @@ public class SinogramProcessor {
             int x = (int) point.getX();
             int y = (int) point.getY();
             if (x >= 0 && x < image.getWidth() && y >= 0 && y < image.getHeight()) {
-                value += new Color(image.getRGB(x, y)).getRed();
+                value += (image.getRGB(x, y) >> 16) & 0xFF;
             }
 
         }
 
-        this.tableMin = Math.min(value, tableMin);
-        this.tableMax = Math.max(value, tableMax);
+        value = value / line.size();
+
+        statistics.add(value);
 
         return value;
     }
@@ -73,30 +74,58 @@ public class SinogramProcessor {
     public void drawSinogram() {
         for (int i = 0; i < detectors; i++) {
             for (int j = 0; j < scans; j++) {
-                int color = getNormalizedColor(i, j).getRGB();
-                sinogram.setRGB(i, j, color);
+                int color = getNormalizedColor(i, j);
+                sinogram.getRaster().setSample(i, j, 0, color);
             }
         }
     }
 
-    private Color getNormalizedColor(int x, int y) {
-        if (tableMin == tableMax) {
-            return new Color(0, 0, 0);
+    private int getNormalizedColor(int x, int y) {
+
+        double min = statistics.getMin();
+        double max = statistics.getMax();
+
+        if (min == max) {
+            return 0;
         } else {
-            int value = (int) (((sinogramTable[x][y] - tableMin) * 255.0) / (tableMax - tableMin));
-            return new Color(value, value, value);
+            int value = (int) (((sinogramTable[x][y] - min) * 255.0) / (max - min));
+
+            value = Math.max(0, value);
+            value = Math.min(255, value);
+
+            return value;
         }
     }
 
     public void filterSinogram() {
         double[] kernel = createKernel();
 
-        tableMin = Double.MAX_VALUE;
-        tableMax = Double.MIN_VALUE;
+        statistics = new Statistics(); // TODO: do sth with that
 
-        for (int detector = 0; detector < detectors; detector++) {
-            sinogramTable[detector] = convolve(sinogramTable[detector], kernel);
+//        for (int detector = 0; detector < detectors; detector++) {
+//            sinogramTable[detector] = convolve(sinogramTable[detector], kernel);
+//        }
+
+        double[][] filteredSinogram = new double[detectors][scans];
+
+        for (int scan = 0; scan < scans; scan++) {
+            for (int detector = 0; detector < detectors; detector++) {
+                double sum = 0;
+
+                for (int i = 0; i < kernel.length; i++) {
+                    int index = detector - kernel.length / 2 + i;
+
+                    if (index >= 0 && index < detectors) {
+                        sum += sinogramTable[index][scan] * kernel[i];
+                    }
+                }
+
+                filteredSinogram[detector][scan] = sum;
+                statistics.add(sum);
+            }
         }
+
+        sinogramTable = filteredSinogram;
     }
 
     private double[] createKernel() {
@@ -135,8 +164,7 @@ public class SinogramProcessor {
             }
             output[i] = sum;
 
-            tableMin = Math.min(sum, tableMin);
-            tableMax = Math.max(sum, tableMax);
+            statistics.add(sum);
         }
 
         return output;

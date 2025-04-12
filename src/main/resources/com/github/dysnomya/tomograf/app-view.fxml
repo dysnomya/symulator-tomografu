@@ -61,7 +61,7 @@
         <HBox spacing="10">
             <Label text="Detectors"/>
             <Slider fx:id="detectorsSlider"
-                    min="5" max="360"
+                    min="5" max="900"
                     value="180"
                     showTickLabels="true"
                     showTickMarks="true"
@@ -74,7 +74,7 @@
             <Slider fx:id="angleSlider"
                     min="15"
                     max="360"
-                    value="180"
+                    value="270"
                     showTickLabels="true"
                     showTickMarks="true"
                     snapToTicks="true"

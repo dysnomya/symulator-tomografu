@@ -77,15 +77,13 @@ public class AppController {
         try {
             BufferedImage image = ImageIO.read(url); // JDeli.read(file)
             Sinogram sinogram = new Sinogram(image, (int) scansSlider.getValue(), (int) detectorsSlider.getValue(), (int) angleSlider.getValue());
-            imageSinogram.setImage(sinogram.processSinogram(false));
+            imageSinogram.setImage(sinogram.processSinogram());
             sinogram.recreateImage();
             imageResult.setImage(sinogram.getResultImage());
 
-            Sinogram sinogramFiltered = new Sinogram(image, (int) scansSlider.getValue(), (int) detectorsSlider.getValue(), (int) angleSlider.getValue());
-            imageSinogramFiltered.setImage(sinogramFiltered.processSinogram(true));
+            imageSinogramFiltered.setImage(sinogram.filterSinogram());
 
-            sinogramFiltered.recreateImage();
-            imageResultFiltered.setImage(sinogramFiltered.getResultImage());
+            imageResultFiltered.setImage(sinogram.recreateImage());
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

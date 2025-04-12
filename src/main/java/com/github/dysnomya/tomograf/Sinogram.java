@@ -32,15 +32,17 @@ public class Sinogram {
         this.angle = angle;
     }
 
-    public Image processSinogram(Boolean filter) {
+    public Image processSinogram() {
         this.lines = createLines();
         sinogramProcessor = new SinogramProcessor(image, scans, detectors, angle);
         sinogramProcessor.fillSinogramTable(this.lines);
 
-        if (filter) {
-            sinogramProcessor.filterSinogram();
-        }
+        sinogramProcessor.drawSinogram();
+        return sinogramProcessor.getSinogram();
+    }
 
+    public Image filterSinogram() {
+        sinogramProcessor.filterSinogram();
         sinogramProcessor.drawSinogram();
         return sinogramProcessor.getSinogram();
     }
@@ -57,7 +59,12 @@ public class Sinogram {
     public BresenhamLine[][] createLines() {
         BresenhamLine[][] lines = new BresenhamLine[scans][detectors];
 
-        double r = (double) Math.max(image.getHeight(), image.getWidth()) / 2;
+        double r = Math.sqrt(Math.pow((double) image.getHeight() / 2, 2) + Math.pow((double) image.getWidth() / 2, 2));
+//        double r = (double) Math.min(image.getHeight(), image.getWidth()) / 2;
+
+        double rx = (double) image.getWidth() / 2;
+        double ry = (double) image.getHeight() / 2;
+
         double alfa = Math.toRadians(360.0 / scans);
         double phi = Math.toRadians(angle);
         double pi = Math.PI;
@@ -66,11 +73,11 @@ public class Sinogram {
             for (int i = 0; i < detectors; i++) {
                 double alfangle = Math.toRadians(90) + alfa * j;
 
-                double x1 = r + r * Math.cos(alfangle);
-                double y1 = r + r * Math.sin(alfangle);
+                double x1 = rx + r * Math.cos(alfangle);
+                double y1 = rx + r * Math.sin(alfangle);
 
-                double x2 = r + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
-                double y2 = r + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
+                double x2 = ry + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
+                double y2 = ry + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
 
                 lines[j][i] = new BresenhamLine(x1, y1, x2, y2);
             }
