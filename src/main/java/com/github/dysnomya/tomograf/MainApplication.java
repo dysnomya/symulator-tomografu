@@ -12,7 +12,7 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("app-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1350, 900);
+        Scene scene = new Scene(fxmlLoader.load(), 1800, 900);
         stage.setTitle("Symulator tomografu");
         stage.setScene(scene);
         stage.show();

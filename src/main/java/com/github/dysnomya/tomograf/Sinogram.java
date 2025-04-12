@@ -1,5 +1,6 @@
 package com.github.dysnomya.tomograf;
 
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -47,11 +48,19 @@ public class Sinogram {
         return sinogramProcessor.getSinogram();
     }
 
-    public Image recreateImage() {
-        SinogramReconstructor sr = new SinogramReconstructor(image.getWidth(), image.getHeight());
-        sr.fillReconstructionTable(lines, sinogramProcessor.getSinogramTable(), scans, detectors);
+    public Image recreateImage(List<Image> sliderViews) {
+        sliderViews.clear();
 
-        sr.drawReconstruction();
+        SinogramReconstructor sr = new SinogramReconstructor(image.getWidth(), image.getHeight());
+
+        // set 0 frame
+        sliderViews.add(sr.getReconstruction());
+
+        for (int scan = 0; scan < scans; scan++) {
+            sr.fillReconstructionTable(lines, sinogramProcessor.getSinogramTable(), scan, detectors);
+            sr.drawReconstruction();
+            sliderViews.add(sr.getReconstruction());
+        }
 
         return sr.getReconstruction();
     }
@@ -71,12 +80,12 @@ public class Sinogram {
 
         for (int j = 0; j < scans; j++) {
             for (int i = 0; i < detectors; i++) {
-                double alfangle = Math.toRadians(90) + alfa * j;
+                double alfangle = Math.toRadians(-90) + alfa * j;
 
                 double x1 = rx + r * Math.cos(alfangle);
-                double y1 = rx + r * Math.sin(alfangle);
+                double y1 = ry + r * Math.sin(alfangle);
 
-                double x2 = ry + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
+                double x2 = rx + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
                 double y2 = ry + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
 
                 lines[j][i] = new BresenhamLine(x1, y1, x2, y2);
@@ -84,9 +93,5 @@ public class Sinogram {
         }
 
         return lines;
-    }
-
-    public Image getResultImage() {
-        return recreateImage();
     }
 }

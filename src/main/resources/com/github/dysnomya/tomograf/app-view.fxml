@@ -14,15 +14,19 @@
 <?import javafx.scene.control.Slider?>
 <GridPane alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
           fx:controller="com.github.dysnomya.tomograf.AppController"
-          fx:id="gridpane">
-<!--    <padding>-->
-<!--        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>-->
-<!--    </padding>-->
+          fx:id="gridpane"
+          vgap="20.0"
+          hgap="20.0">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
 
     <columnConstraints>
-        <ColumnConstraints percentWidth="33" />
-        <ColumnConstraints percentWidth="33" />
-        <ColumnConstraints percentWidth="33" />
+        <ColumnConstraints percentWidth="25" />
+        <ColumnConstraints percentWidth="25" />
+        <ColumnConstraints percentWidth="25" />
+        <ColumnConstraints percentWidth="25" />
+
     </columnConstraints>
 
     <rowConstraints>
@@ -31,24 +35,16 @@
     </rowConstraints>
 
 
-    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
+    <VBox GridPane.columnIndex="0" GridPane.rowIndex="0" spacing="10.0" alignment="TOP_CENTER" >
         <Label fx:id="imageBeforeName"/>
 
         <ImageView fx:id="imageBeforeView" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
-    <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="10">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
-        <HBox spacing="10">
-            <Label text="Scans"/>
-            <Slider fx:id="scansSlider"
+    <VBox GridPane.columnIndex="0" GridPane.rowIndex="1" spacing="10.0" alignment="TOP_CENTER" >
+        <GridPane vgap="10.0" hgap="10.0">
+            <Label text="Scans" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <Slider fx:id="scansSlider" GridPane.rowIndex="0" GridPane.columnIndex="1"
                     min="15"
                     max="900"
                     value="90"
@@ -56,22 +52,20 @@
                     showTickMarks="true"
                     snapToTicks="true"
                     prefWidth="300"/>
-        </HBox>
 
-        <HBox spacing="10">
-            <Label text="Detectors"/>
-            <Slider fx:id="detectorsSlider"
+
+            <Label text="Detectors" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Slider fx:id="detectorsSlider" GridPane.rowIndex="1" GridPane.columnIndex="1"
                     min="5" max="900"
                     value="180"
                     showTickLabels="true"
                     showTickMarks="true"
                     snapToTicks="true"
                     prefWidth="300"/>
-        </HBox>
 
-        <HBox spacing="10">
-            <Label text="Angle"/>
-            <Slider fx:id="angleSlider"
+
+            <Label text="Angle" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <Slider fx:id="angleSlider" GridPane.rowIndex="2" GridPane.columnIndex="1"
                     min="15"
                     max="360"
                     value="270"
@@ -79,55 +73,57 @@
                     showTickMarks="true"
                     snapToTicks="true"
                     prefWidth="300"/>
-        </HBox>
 
-        <HBox spacing="10">
-            <Label text="Wybierz zdjęcie"/>
-            <ComboBox fx:id="imageChoice" onAction="#generateImage"/>
-        </HBox>
+
+            <Label text="Wybierz zdjęcie" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="imageChoice" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                    onAction="#generateImage"/>
+
+
+            <Button text="Wygeneruj" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.rowSpan="2"
+                    onAction="#generateSinogram"/>
+        </GridPane>
+
+
 
     </VBox>
 
-    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
+    <VBox GridPane.columnIndex="1" GridPane.rowIndex="0" spacing="10.0" alignment="TOP_CENTER">
         <Label text="Sinogram"/>
 
         <ImageView fx:id="imageSinogram" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
-    <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" alignment="CENTER" spacing="10.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
+    <VBox GridPane.columnIndex="2" GridPane.rowIndex="0" spacing="10.0" alignment="TOP_CENTER">
         <Label text="Wynik"/>
 
         <ImageView fx:id="imageResult" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
-    <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" alignment="CENTER" spacing="10.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
+    <VBox GridPane.columnIndex="1" GridPane.rowIndex="1" spacing="10.0" alignment="TOP_CENTER">
         <Label text="Sinogram"/>
 
         <ImageView fx:id="imageSinogramFiltered" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
-    <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" alignment="CENTER" spacing="10.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-
+    <VBox GridPane.columnIndex="2" GridPane.rowIndex="1" spacing="10.0" alignment="TOP_CENTER">
         <Label text="Wynik"/>
 
         <ImageView fx:id="imageResultFiltered" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
 
 
+
+    <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" spacing="10.0" alignment="TOP_CENTER">
+        <Slider fx:id="slider" blockIncrement="1"/>
+
+        <ImageView fx:id="sliderView" fitHeight="400" fitWidth="400" preserveRatio="true"/>
+    </VBox>
+
+    <VBox GridPane.columnIndex="3" GridPane.rowIndex="1" spacing="10.0" alignment="TOP_CENTER">
+        <Slider fx:id="filteredSlider" blockIncrement="1"/>
+
+        <ImageView fx:id="filteredSliderView" fitHeight="400" fitWidth="400" preserveRatio="true"/>
+    </VBox>
 
 </GridPane>

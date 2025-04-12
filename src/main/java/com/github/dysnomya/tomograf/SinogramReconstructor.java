@@ -21,18 +21,16 @@ public class SinogramReconstructor {
         return SwingFXUtils.toFXImage(reconstruction, null);
     }
 
-    public void fillReconstructionTable(BresenhamLine[][] lines, double[][] sinogramTable, int scans, int detectors) {
+    public void fillReconstructionTable(BresenhamLine[][] lines, double[][] sinogramTable, int scan, int detectors) {
         for (int i = 0; i < detectors; i++) {
-            for (int j = 0; j < scans; j++) {
-                double projectionValue = sinogramTable[i][j];
+            double projectionValue = sinogramTable[i][scan];
 
-                for (Point point: lines[j][i].getLine()) {
-                    int x = (int) point.getX();
-                    int y = (int) point.getY();
+            for (Point point : lines[scan][i].getLine()) {
+                int x = (int) point.getX();
+                int y = (int) point.getY();
 
-                    if (x >= 0 && x < reconstruction.getWidth() && y >= 0 && y < reconstruction.getHeight()) {
-                        reconstructionTable[x][y] += projectionValue;
-                    }
+                if (x >= 0 && x < reconstruction.getWidth() && y >= 0 && y < reconstruction.getHeight()) {
+                    reconstructionTable[x][y] += projectionValue;
                 }
             }
         }
