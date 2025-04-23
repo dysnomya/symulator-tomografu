@@ -17,6 +17,7 @@ public class Sinogram {
     private int angle;
     private BresenhamLine[][] lines;
     private SinogramProcessor sinogramProcessor;
+    private SinogramReconstructor sinogramReconstructor;
 
 
     public Sinogram(BufferedImage image) {
@@ -34,7 +35,8 @@ public class Sinogram {
     }
 
     public Image processSinogram() {
-        this.lines = createLines();
+        this.lines = new BresenhamLine[scans][detectors];
+        createLines();
         sinogramProcessor = new SinogramProcessor(image, scans, detectors, angle);
         sinogramProcessor.fillSinogramTable(this.lines);
 
@@ -48,28 +50,34 @@ public class Sinogram {
         return sinogramProcessor.getSinogram();
     }
 
+    public BufferedImage getBufferedImage() {
+        return sinogramReconstructor.getReconstructionBufferedImage();
+    }
+
     public Image recreateImage(List<Image> sliderViews) {
         sliderViews.clear();
 
-        SinogramReconstructor sr = new SinogramReconstructor(image.getWidth(), image.getHeight());
+        sinogramReconstructor = new SinogramReconstructor(image.getWidth(), image.getHeight());
 
         // set 0 frame
-        sliderViews.add(sr.getReconstruction());
+        sliderViews.add(sinogramReconstructor.getReconstruction());
 
         for (int scan = 0; scan < scans; scan++) {
-            sr.fillReconstructionTable(lines, sinogramProcessor.getSinogramTable(), scan, detectors);
-            sr.drawReconstruction();
-            sliderViews.add(sr.getReconstruction());
+            sinogramReconstructor.fillReconstructionTable(lines, sinogramProcessor.getSinogramTable(), scan, detectors);
+
+            sinogramReconstructor.drawReconstruction();  // zakomentować te dwie linie, by nie generować przejścia rekonstrukcji po każdym skanie
+            sliderViews.add(sinogramReconstructor.getReconstruction()); // zakomentować te dwie linie, by nie generować przejścia rekonstrukcji po każdym skanie
+
         }
 
-        return sr.getReconstruction();
+        sinogramReconstructor.drawReconstruction();
+
+        return sinogramReconstructor.getReconstruction();
     }
 
-    public BresenhamLine[][] createLines() {
-        BresenhamLine[][] lines = new BresenhamLine[scans][detectors];
-
-        double r = Math.sqrt(Math.pow((double) image.getHeight() / 2, 2) + Math.pow((double) image.getWidth() / 2, 2));
-//        double r = (double) Math.min(image.getHeight(), image.getWidth()) / 2;
+    public void createLines() {
+        double r = Math.sqrt(Math.pow((double) image.getHeight() / 2, 2) + Math.pow((double) image.getWidth() / 2, 2)); // duże r
+//        double r = (double) Math.min(image.getHeight(), image.getWidth()) / 2;                                        // małe r
 
         double rx = (double) image.getWidth() / 2;
         double ry = (double) image.getHeight() / 2;
@@ -88,10 +96,8 @@ public class Sinogram {
                 double x2 = rx + r * Math.cos(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
                 double y2 = ry + r * Math.sin(alfangle + pi - phi / 2 + (i * (phi / (detectors - 1))));
 
-                lines[j][i] = new BresenhamLine(x1, y1, x2, y2);
+                lines[j][i] = new BresenhamLine(x1, y1, x2, y2, image.getWidth(), image.getHeight());
             }
         }
-
-        return lines;
     }
 }

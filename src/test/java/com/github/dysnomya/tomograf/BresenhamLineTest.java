@@ -17,7 +17,7 @@ class BresenhamLineTest {
 
     @Test
     void getLineTest() {
-        BresenhamLine line = new BresenhamLine(10, 5, 2, 1);
+        BresenhamLine line = new BresenhamLine(10, 5, 2, 1, 15, 15);
         System.out.println(line.getLine());
     }
 }

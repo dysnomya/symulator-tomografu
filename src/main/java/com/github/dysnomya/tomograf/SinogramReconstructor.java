@@ -5,47 +5,43 @@ import javafx.scene.image.Image;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.DoubleSummaryStatistics;
 
 public class SinogramReconstructor {
     private BufferedImage reconstruction;
     private double[][] reconstructionTable;
-    private Statistics statistics;
+    private DoubleSummaryStatistics statistics;
 
     public SinogramReconstructor(int width, int height) {
         this.reconstruction = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
         this.reconstructionTable = new double[width][height];
-        this.statistics = new Statistics();
+        this.statistics = new DoubleSummaryStatistics();
     }
 
     public Image getReconstruction() {
         return SwingFXUtils.toFXImage(reconstruction, null);
     }
 
-    public void fillReconstructionTable(BresenhamLine[][] lines, double[][] sinogramTable, int scan, int detectors) {
-        for (int i = 0; i < detectors; i++) {
-            double projectionValue = sinogramTable[i][scan];
+    public BufferedImage getReconstructionBufferedImage() {
+        return reconstruction;
+    }
 
-            for (Point point : lines[scan][i].getLine()) {
+    public void fillReconstructionTable(BresenhamLine[][] lines, double[][] sinogramTable, int scan, int detectors) {
+        for (int detector = 0; detector < detectors; detector++) {
+            double projectionValue = sinogramTable[detector][scan];
+
+            for (Point point : lines[scan][detector].getLine()) {
                 int x = (int) point.getX();
                 int y = (int) point.getY();
 
                 if (x >= 0 && x < reconstruction.getWidth() && y >= 0 && y < reconstruction.getHeight()) {
                     reconstructionTable[x][y] += projectionValue;
+
+                    statistics.accept(reconstructionTable[x][y]);
                 }
             }
         }
-
-        createStatistics();
     }
-
-    private void createStatistics() {
-        for (double[] doubles : reconstructionTable) {
-            for (int j = 0; j < reconstructionTable[0].length; j++) {
-                statistics.add(doubles[j]);
-            }
-        }
-    }
-
 
     public void drawReconstruction() {
         for (int i = 0; i < reconstruction.getWidth(); i++) {

@@ -12,6 +12,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
 <GridPane alignment="CENTER" xmlns:fx="http://javafx.com/fxml"
           fx:controller="com.github.dysnomya.tomograf.AppController"
           fx:id="gridpane"
@@ -46,38 +48,47 @@
             <Label text="Scans" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
             <Slider fx:id="scansSlider" GridPane.rowIndex="0" GridPane.columnIndex="1"
                     min="15"
-                    max="900"
-                    value="90"
-                    showTickLabels="true"
-                    showTickMarks="true"
-                    snapToTicks="true"
-                    prefWidth="300"/>
-
-
-            <Label text="Detectors" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <Slider fx:id="detectorsSlider" GridPane.rowIndex="1" GridPane.columnIndex="1"
-                    min="5" max="900"
+                    max="720"
                     value="180"
                     showTickLabels="true"
                     showTickMarks="true"
                     snapToTicks="true"
                     prefWidth="300"/>
+            <TextField fx:id="scansTextField" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                    prefWidth="42"/>
+
+
+            <Label text="Detectors" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Slider fx:id="detectorsSlider" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                    min="5" max="720"
+                    value="180"
+                    showTickLabels="true"
+                    showTickMarks="true"
+                    snapToTicks="true"
+                    prefWidth="300"/>
+            <TextField fx:id="detectorsTextField" GridPane.rowIndex="1" GridPane.columnIndex="2"
+                       prefWidth="42"/>
 
 
             <Label text="Angle" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
             <Slider fx:id="angleSlider" GridPane.rowIndex="2" GridPane.columnIndex="1"
                     min="15"
                     max="360"
-                    value="270"
+                    value="180"
                     showTickLabels="true"
                     showTickMarks="true"
                     snapToTicks="true"
                     prefWidth="300"/>
-
+            <TextField fx:id="angleTextField" GridPane.rowIndex="2" GridPane.columnIndex="2"
+                       prefWidth="42"/>
 
             <Label text="Wybierz zdjęcie" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-            <ComboBox fx:id="imageChoice" GridPane.rowIndex="3" GridPane.columnIndex="1"
-                    onAction="#generateImage"/>
+
+            <HBox GridPane.rowIndex="3" GridPane.columnIndex="1" spacing="10.0">
+                <ComboBox fx:id="imageChoice" onAction="#generateImage"/>
+                <CheckBox fx:id="imageType" text="DICOM" onAction="#setFileNames"/>
+            </HBox>
+
 
 
             <Button text="Wygeneruj" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.rowSpan="2"
@@ -111,8 +122,6 @@
 
         <ImageView fx:id="imageResultFiltered" fitHeight="400" fitWidth="400" preserveRatio="true"/>
     </VBox>
-
-
 
     <VBox GridPane.columnIndex="3" GridPane.rowIndex="0" spacing="10.0" alignment="TOP_CENTER">
         <Slider fx:id="slider" blockIncrement="1"/>

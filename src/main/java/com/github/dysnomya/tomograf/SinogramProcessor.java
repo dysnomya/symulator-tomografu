@@ -2,8 +2,6 @@ package com.github.dysnomya.tomograf;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -16,7 +14,7 @@ public class SinogramProcessor {
     private int detectors;
     private int angle;
     private double[][] sinogramTable;
-    private Statistics statistics;
+    private DoubleSummaryStatistics statistics;
     private BufferedImage sinogram;
 
 
@@ -27,7 +25,7 @@ public class SinogramProcessor {
         this.angle = angle;
         this.sinogram = new BufferedImage(detectors, scans, BufferedImage.TYPE_BYTE_GRAY);
         this.sinogramTable = new double[detectors][scans];
-        this.statistics = new Statistics();
+        this.statistics = new DoubleSummaryStatistics();
     }
 
     public Image getSinogram() {
@@ -63,10 +61,9 @@ public class SinogramProcessor {
             }
 
         }
-
         value = value / line.size();
 
-        statistics.add(value);
+        statistics.accept(value);
 
         return value;
     }
@@ -100,32 +97,9 @@ public class SinogramProcessor {
     public void filterSinogram() {
         double[] kernel = createKernel();
 
-        statistics = new Statistics(); // TODO: do sth with that
+        statistics = new DoubleSummaryStatistics();
 
-//        for (int detector = 0; detector < detectors; detector++) {
-//            sinogramTable[detector] = convolve(sinogramTable[detector], kernel);
-//        }
-
-        double[][] filteredSinogram = new double[detectors][scans];
-
-        for (int scan = 0; scan < scans; scan++) {
-            for (int detector = 0; detector < detectors; detector++) {
-                double sum = 0;
-
-                for (int i = 0; i < kernel.length; i++) {
-                    int index = detector - kernel.length / 2 + i;
-
-                    if (index >= 0 && index < detectors) {
-                        sum += sinogramTable[index][scan] * kernel[i];
-                    }
-                }
-
-                filteredSinogram[detector][scan] = sum;
-                statistics.add(sum);
-            }
-        }
-
-        sinogramTable = filteredSinogram;
+        sinogramTable = convolve(kernel);
     }
 
     private double[] createKernel() {
@@ -146,28 +120,28 @@ public class SinogramProcessor {
         return kernel;
     }
 
-    public double[] convolve(double[] input, double[] kernel) {
-        int inputLength = input.length;
-        int kernelLength = kernel.length;
-        int outputLength = inputLength;
-        double[] output = new double[outputLength];
+    public double[][] convolve(double[] kernel) {
+        double[][] filteredSinogram = new double[detectors][scans];
 
-        int pad = (kernelLength - 1) / 2;
+        for (int scan = 0; scan < scans; scan++) {
+            for (int detector = 0; detector < detectors; detector++) {
+                double sum = 0;
 
-        for (int i = 0; i < outputLength; i++) {
-            double sum = 0;
-            for (int j = 0; j < kernelLength; j++) {
-                int inputIndex = i - pad + j;
-                if (inputIndex >= 0 && inputIndex < inputLength) {
-                    sum += input[inputIndex] * kernel[j];
+                for (int i = 0; i < kernel.length; i++) {
+                    int index = detector - kernel.length / 2 + i;
+
+                    if (index >= 0 && index < detectors) {
+                        sum += sinogramTable[index][scan] * kernel[i];
+                    }
                 }
-            }
-            output[i] = sum;
 
-            statistics.add(sum);
+                filteredSinogram[detector][scan] = sum;
+
+                statistics.accept(sum);
+            }
         }
 
-        return output;
+        return filteredSinogram;
     }
 
 }
